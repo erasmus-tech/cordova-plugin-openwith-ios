@@ -160,7 +160,7 @@
 
     BOOL isLoggedIn = [self.userDefaults boolForKey:@"loggedIn"];
 
-    if (!isLoggedIn) {
+    /* if (!isLoggedIn) {
 
         NSString *alertTitle = NSLocalizedString(@"Sharing error", @"Sharing error alert title");
         NSString *alertMessage = NSLocalizedString(@"You have to be logged in in order to share items.", @"Sharing error alert message");
@@ -180,7 +180,7 @@
 
         [self presentViewController:alert animated:YES completion: nil];
         return;
-    }
+    } */
 
     __block int remainingAttachments = ((NSExtensionItem*)self.extensionContext.inputItems[0]).attachments.count;
     __block NSMutableArray *items = [[NSMutableArray alloc] init];
@@ -198,6 +198,7 @@
                 --remainingAttachments;
                 [self debug:[NSString stringWithFormat:@"public.url = %@", item]];
                 NSString *uti = @"public.url";
+                [self debug:@"[---1---]"];
                 NSDictionary *dict = @{
 
                                            @"data" : item.absoluteString,
@@ -206,8 +207,11 @@
                                            @"name": @"",
                                            @"type": [self mimeTypeFromUti:uti],
                                       };
+                [self debug:@"[---2---]"];
                 [items addObject:dict];
+                [self debug:@"[---3---]"];
                 if (remainingAttachments == 0) {
+                    [self debug:@"[---4---]"];
                     [self sendResults:results];
                 }
             }];
@@ -275,12 +279,13 @@
 }
 
 - (void) sendResults: (NSDictionary*)results {
+    [self debug:@"[sendResults]"];
     [self.userDefaults setObject:results forKey:@"shared"];
     [self.userDefaults synchronize];
-
+    NSLog(@"RESULTS: %@", results);
     // Emit a URL that opens the cordova app
     NSString *url = [NSString stringWithFormat:@"%@://shared", SHAREEXT_URL_SCHEME];
-
+    [self debug:url];
     [self openURL:[NSURL URLWithString:url]];
 
     // Shut down the extension
